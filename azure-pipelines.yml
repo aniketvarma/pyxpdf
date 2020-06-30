@@ -25,7 +25,7 @@ jobs:
   variables:
     WITH_CYTHON: true
     CIBW_TEST_COMMAND: "python {project}/runtests.py -v"
-    CIBW_SKIP: "?p27* pp*"
+    CIBW_BUILD: "cp36-*" 
     CIBW_BUILD_VERBOSITY: 1
   steps:
     - task: UsePythonVersion@0
