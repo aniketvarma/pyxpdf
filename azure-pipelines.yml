@@ -79,7 +79,7 @@ jobs:
         python3 -m pip install wheelhouse/pyxpdf*
         python3 runtests.py -v || exit 1
         if python3 -m twine check wheelhouse/**/*; then
-          python3 -m twine upload --repository testpypi --non-interactive wheelhouse/**/*
+          python3 -m twine upload --repository testpypi --non-interactive --verbose wheelhouse/**/*
         fi
       displayName: PyPi Release
 
