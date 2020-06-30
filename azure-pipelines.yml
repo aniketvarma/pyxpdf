@@ -59,51 +59,44 @@ jobs:
       displayName: "Create Artifacts"
 
 
-- deployment: publishWheels
+- job: publishWheels
   displayName: Make Github Release
   dependsOn: Build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
-  environment: 'pyxpdf-dev'
-  strategy: 
-    runOnce:
-      deploy:
-        pool: {vmImage: "ubuntu-latest"}
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'specific'
-              downloadPath: 'wheelhouse'
-          - bash: ls wheelhouse
+  pool: {vmImage: "ubuntu-latest"}
+  steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: 'wheelhouse'
 
-          - bash: |
-              python3 -m pip install --upgrade pip setuptools twine
-              python3 -m pip install -r requirements.txt
-              python3 setup.py sdist -d wheelhouse --with-cython
-              pushd dist
-              python3 -m venv venv
-              python3 -m pip install --upgrade pip setuptools twine
-              source venv/bin/activate
-              echo $(which python3)
-              python3 -m pip install pyxpdf*
-              python3 ../runtests.py -v || exit 1
-              popd
-              if twine check wheelhouse/**/*; then
-                twine upload --repository testpypi wheelhouse/**/*
-              fi
-            displayName: PyPi Release
+    - bash: ls wheelhouse
 
-          - task: GitHubRelease@1
-            inputs:
-              gitHubConnection: 'github.com_ashutoshvarma'
-              repositoryName: '$(Build.Repository.Name)'
-              action: 'create'
-              target: '$(Build.SourceVersion)'
-              tagSource: 'gitTag'
-              tagPattern: 'v.+'
-              releaseNotesSource: 'inline'
-              releaseNotesInline: 'Changelog - https://pyxpdf.readthedocs.io/en/latest/changelog.html'
-              assets: 'wheelhouse/**/*'
-              addChangeLog: false
+    - bash: |
+        python3 -m pip install --upgrade pip setuptools twine
+        python3 -m pip install -r requirements.txt
+        python3 setup.py sdist -d wheelhouse --with-cython
+        pushd dist
+        python3 -m pip install pyxpdf*
+        python3 ../runtests.py -v || exit 1
+        popd
+        if twine check wheelhouse/**/*; then
+          twine upload --repository testpypi wheelhouse/**/*
+        fi
+      displayName: PyPi Release
 
-          
+    - task: GitHubRelease@1
+      inputs:
+        gitHubConnection: 'github.com_ashutoshvarma'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'gitTag'
+        tagPattern: 'v.+'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: 'Changelog - https://pyxpdf.readthedocs.io/en/latest/changelog.html'
+        assets: 'wheelhouse/**/*'
+        addChangeLog: false
+
+    
