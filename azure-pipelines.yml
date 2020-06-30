@@ -21,11 +21,6 @@ jobs:
         artifactName: macwheels
         CFLAGS: "-std=c++14"
         CIBW_BEFORE_TEST: pip install -r {project}/test_requirements.txt && pip uninstall -y pyxpdf_data
-      WinWheels:
-        imageName: 'windows-latest'
-        artifactName: winwheels
-        CIBW_BEFORE_BUILD_WINDOWS: pip install -r {project}\requirements.txt && rmdir /S /Q libs || echo "No libs"
-        CIBW_BEFORE_TEST: pip install -r {project}\test_requirements.txt && pip uninstall -y pyxpdf_data
   pool: { vmImage: $(imageName) }
   variables:
     WITH_CYTHON: true
@@ -87,10 +82,11 @@ jobs:
               python setup.py sdist -d wheelhouse --with-cython
               pushd dist
               python -m venv venv
+              python -m pip install --upgrade pip setuptools twine
               source venv/bin/activate
               echo $(which python)
               python -m pip install pyxpdf*
-              python ../runtests.py -v
+              python ../runtests.py -v || exit 1
               popd
               if twine check wheelhouse/**/*; then
                 twine upload --repository testpypi wheelhouse/**/*
