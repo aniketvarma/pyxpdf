@@ -77,16 +77,16 @@ jobs:
           - bash: ls wheelhouse
 
           - bash: |
-              python -m pip install --upgrade pip setuptools twine
-              python -m pip install -r requirements.txt
-              python setup.py sdist -d wheelhouse --with-cython
+              python3 -m pip install --upgrade pip setuptools twine
+              python3 -m pip install -r requirements.txt
+              python3 setup.py sdist -d wheelhouse --with-cython
               pushd dist
-              python -m venv venv
-              python -m pip install --upgrade pip setuptools twine
+              python3 -m venv venv
+              python3 -m pip install --upgrade pip setuptools twine
               source venv/bin/activate
-              echo $(which python)
-              python -m pip install pyxpdf*
-              python ../runtests.py -v || exit 1
+              echo $(which python3)
+              python3 -m pip install pyxpdf*
+              python3 ../runtests.py -v || exit 1
               popd
               if twine check wheelhouse/**/*; then
                 twine upload --repository testpypi wheelhouse/**/*
