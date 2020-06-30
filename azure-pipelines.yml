@@ -63,10 +63,11 @@ jobs:
         ArtifactName: $(artifactName)
       displayName: "Create Artifacts"
 
+
 - deployment: publishWheels
   displayName: Make Github Release
   dependsOn: Build
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
   environment: 'pyxpdf-dev'
   strategy: 
     runOnce:
@@ -79,6 +80,23 @@ jobs:
               downloadType: 'specific'
               downloadPath: 'wheelhouse'
           - bash: ls wheelhouse
+
+          - bash: |
+              python -m pip install --upgrade pip setuptools twine
+              python -m pip install -r requirements.txt
+              python setup.py sdist -d wheelhouse --with-cython
+              pushd dist
+              python -m venv venv
+              source venv/bin/activate
+              echo $(which python)
+              python -m pip install pyxpdf*
+              python ../runtests.py -v
+              popd
+              if twine check wheelhouse/**/*; then
+                twine upload --repository testpypi wheelhouse/**/*
+              fi
+            displayName: PyPi Release
+
           - task: GitHubRelease@1
             inputs:
               gitHubConnection: 'github.com_ashutoshvarma'
@@ -88,6 +106,8 @@ jobs:
               tagSource: 'gitTag'
               tagPattern: 'v.+'
               releaseNotesSource: 'inline'
+              releaseNotesInline: 'Changelog - https://pyxpdf.readthedocs.io/en/latest/changelog.html'
               assets: 'wheelhouse/**/*'
-              changeLogCompareToRelease: 'lastFullRelease'
-              changeLogType: 'commitBased'
+              addChangeLog: false
+
+          
