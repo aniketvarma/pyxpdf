@@ -16,11 +16,6 @@ jobs:
         artifactName: linuxwheels
         CFLAGS: "-std=c++14"
         CIBW_BEFORE_TEST: pip install -r {project}/test_requirements.txt && pip uninstall -y pyxpdf_data
-      MacWheels:
-        imageName: 'macOS-10.15'
-        artifactName: macwheels
-        CFLAGS: "-std=c++14"
-        CIBW_BEFORE_TEST: pip install -r {project}/test_requirements.txt && pip uninstall -y pyxpdf_data
   pool: { vmImage: $(imageName) }
   variables:
     WITH_CYTHON: true
@@ -60,13 +55,13 @@ jobs:
 
 
 - job: publishWheels
-  displayName: Make Github Release
+  displayName: Make Release
   dependsOn: Build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
   pool: {vmImage: "ubuntu-latest"}
   variables:
-    TWINE_USERNAME: $(TWINE_USERNAME)
-    TWINE_PASSWORD: $(TWINE_PASSWORD)
+    TWINE_USERNAME: $(pypi_username)
+    TWINE_PASSWORD: $(pypi_token)
   steps:
     - task: DownloadBuildArtifacts@0
       inputs:
