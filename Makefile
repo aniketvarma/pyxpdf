@@ -1,16 +1,12 @@
 PYTHON?=python3
-PYTHON2?=python2
 TESTFLAGS=-p -v
 TESTOPTS=
 SETUPFLAGS=
 PYXPDFVERSION:=$(shell sed -ne '/__version__/s|.*__version__\s*=\s*"\([^"]*\)".*|\1|p' src/pyxpdf/__init__.py)
 
 PARALLEL:=$(shell $(PYTHON) -c 'import sys; print("-j7" if sys.version_info >= (3, 5) else "")' )
-PARALLEL2:=$(shell $(PYTHON2) -c 'import sys; print("-j7" if sys.version_info >= (3, 5) else "")' )
 PYTHON_WITH_CYTHON:=$(shell $(PYTHON)  -c 'import Cython.Build.Dependencies' >/dev/null 2>/dev/null && echo " --with-cython" || true)
-PY2_WITH_CYTHON:=$(shell $(PYTHON2) -c 'import Cython.Build.Dependencies' >/dev/null 2>/dev/null && echo " --with-cython" || true)
 CYTHON_WITH_COVERAGE:=$(shell $(PYTHON) -c 'import Cython.Coverage; import sys; assert not hasattr(sys, "pypy_version_info")' >/dev/null 2>/dev/null && echo " --coverage" || true)
-CYTHON2_WITH_COVERAGE:=$(shell $(PYTHON2) -c 'import Cython.Coverage; import sys; assert not hasattr(sys, "pypy_version_info")' >/dev/null 2>/dev/null && echo " --coverage" || true)
 
 ifeq ($(OS),Windows_NT) 
     detected_OS := Windows
@@ -37,8 +33,6 @@ inplace:
 inplace_gcc_debug:
 	CFLAGS='$(CFLAGS)' $(PYTHON) setup.py $(SETUPFLAGS) build_ext -i $(PYTHON_WITH_CYTHON) --build-libxpdf --warnings --with-signature \
 																						   --with-coverage --debug-gcc $(PARALLEL)
-inplace2:
-	$(PYTHON2) setup.py $(SETUPFLAGS) build_ext -i $(PY2_WITH_CYTHON) --warnings --with-coverage $(PARALLEL2)
 
 rebuild-sdist: require-cython
 	rm -f dist/pyxpdf-$(PYXPDFVERSION).tar.gz
@@ -64,9 +58,6 @@ gcc_debug: inplace_gcc_debug
 
 test_inplace: inplace
 	$(PYTHON) runtests.py $(TESTFLAGS) $(TESTOPTS) 
-
-test_inplace2: inplace2
-	$(PYTHON2) runtests.py $(TESTFLAGS) $(TESTOPTS) $(CYTHON2_WITH_COVERAGE)
 
 ftest_inplace: inplace
 	$(PYTHON) runtests.py -f $(TESTFLAGS) $(TESTOPTS)
@@ -106,8 +97,6 @@ cleandoc:
 rebuild_doc: cleandoc doc
 
 test: test_inplace
-
-test2: test_inplace2
 
 testw: test_wheel
 
