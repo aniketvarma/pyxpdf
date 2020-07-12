@@ -40,7 +40,8 @@ License
 -------
 ``pyxpdf`` is licensed under the GNU General Public License (GPL), version 3. See the `LICENSE <https://github.com/ashutoshvarma/pyxpdf/blob/master/LICENSE>`_
 
-Credits :-
+Credits
+-------
 
 - `xpdf reader <https://www.xpdfreader.com/>`_ by Derek Noonburg
 - `lxml <https://www.github.com/lxml/lxml>`_ - project structure and build adapted from lxml
